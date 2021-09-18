@@ -112,8 +112,8 @@ def archive_full(directory: str, archive_location: str, ttl: int, weaponised: bo
                 ))
 
     for item in all_items:
-        _atime = datetime.datetime.fromtimestamp(os.stat(item).st_atime)
-        if (datetime.datetime.now() - _atime).days >= ttl and not any([fnmatch.fnmatch(item, pattern) for pattern in paths_to_ignore]) and not item.endswith(ignore_format):
+        _mtime = datetime.datetime.fromtimestamp(os.stat(item).st_mtime)
+        if (datetime.datetime.now() - _mtime).days >= ttl and not any([fnmatch.fnmatch(item, pattern) for pattern in paths_to_ignore]) and not item.endswith(ignore_format):
             to_archive.append(item)
 
     if len(to_archive) != 0:
