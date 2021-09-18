@@ -39,22 +39,19 @@ def archive_unit(directory: str, archive_location: str, ttl: int, weaponised: bo
     _, subdirectories, files = next(all_files)
 
     ignore_files: T.List[str] = [
-        f for f in files if f.endswith(ignore_format)]
+        os.path.join(directory, f) for f in files if os.path.join(directory, f).endswith(ignore_format)]
     paths_to_ignore: T.List[str] = []
     for ignorefile in ignore_files:
         with open(ignorefile) as f:
             for entry in f:
                 paths_to_ignore.append(os.path.join(
                     os.path.dirname(ignorefile), entry.strip("\n")))
-                paths_to_ignore.append(os.path.join(
-                    os.path.dirname(ignorefile), entry.strip("\n"), "*"
-                ))
 
     for subdirectory in subdirectories:
         _mtime = datetime.datetime.fromtimestamp(
             os.stat(os.path.join(directory, subdirectory)).st_mtime)
 
-        if (datetime.datetime.now() - _mtime).days < ttl or any([fnmatch.fnmatch(subdirectory, pattern) for pattern in paths_to_ignore]):
+        if (datetime.datetime.now() - _mtime).days < ttl or any([fnmatch.fnmatch(os.path.join(directory, subdirectory), pattern) for pattern in paths_to_ignore]):
             continue
 
         fn = f"{archive_location}/{subdirectory.replace(' ', '')}.{datetime.datetime.now().strftime('%Y%m%d')}"
@@ -74,16 +71,16 @@ def archive_unit(directory: str, archive_location: str, ttl: int, weaponised: bo
         fn = f"{archive_location}/{datetime.datetime.now().strftime('%Y%m%d')}"
         with tarfile.open(f"{parent_archive}/{fn}.tar.gz", "w:gz") as tar:
             for f in files:
-                if not f.endswith(ignore_format):
+                if not os.path.join(directory, f).endswith(ignore_format):
                     tar.add(os.path.join(directory, f))
 
         with open(f"{library_loc}/{fn}.fofn", "w") as fofn:
             fofn.write(
-                "\n".join([os.path.join(directory, f) for f in files]))
+                "\n".join([os.path.join(directory, f) for f in files if not os.path.join(directory, f).endswith(ignore_format)]))
 
         if weaponised:
             for f in files:
-                if not f.endswith(ignore_format):
+                if not os.path.join(directory, f).endswith(ignore_format):
                     os.remove(os.path.join(directory, f))
 
 
