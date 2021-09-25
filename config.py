@@ -1,3 +1,4 @@
+import logging
 import typing as T
 
 ARCHIVE_LOC: str = "/filestore/Archive"
@@ -21,3 +22,5 @@ ARCHIVE_UNITS: T.Dict[str, T.Tuple[str, int]] = {
     "/filestore/People": ("People", -1),
     "/filestore/Shows": ("Shows", -1)
 }
+
+LOGGING_LEVEL: int = logging.INFO
